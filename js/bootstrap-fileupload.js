@@ -166,6 +166,26 @@
           e.preventDefault()
       }
     })
+    
+    $('body').on('dragenter dragover dragexit', '[data-provides="fileupload"] .thumbnail', function (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    })
+    
+    $('body').on('drop', '[data-provides="fileupload"] .thumbnail', function (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      var $fileUpload = $(this).parents('[data-provides="fileupload"]')
+      
+      if (!$fileUpload.data("fileupload")) {
+        $fileUpload.fileupload($fileUpload.data())
+      }
+      
+      if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length > 0) {
+        $fileUpload.find(':file').prop("files", e.originalEvent.dataTransfer.files).trigger("change")
+      }
+    })
   })
 
 }(window.jQuery);
