@@ -167,25 +167,43 @@
       }
     })
     
-    $('body').on('dragenter dragover dragexit', '[data-provides="fileupload"] .thumbnail', function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    })
+    var isFilesWritable = false
     
-    $('body').on('drop', '[data-provides="fileupload"] .thumbnail', function (e) {
-      e.preventDefault()
-      e.stopPropagation()
+    // Make sure that the 'files' property is writable
+    try {
+      $("<input/>", {'type': 'file'}).get(0).files = "can I write to this?"
       
-      var $fileUpload = $(this).parents('[data-provides="fileupload"]')
-      
-      if (!$fileUpload.data("fileupload")) {
-        $fileUpload.fileupload($fileUpload.data())
+      isFilesWritable = true
+    } catch (e) {
+      if (e instanceof TypeError) {
+        isFilesWritable = false
+      } else {
+        throw e
       }
+    }
+    
+    if (isFilesWritable) {
+      $('body').on('dragenter dragover dragexit', '[data-provides="fileupload"] .thumbnail', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      });
       
-      if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length > 0) {
-        $fileUpload.find(':file').prop("files", e.originalEvent.dataTransfer.files).trigger("change")
-      }
-    })
+      $('body').on('drop', '[data-provides="fileupload"] .thumbnail', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        
+        var $fileUpload = $(this).parents('[data-provides="fileupload"]')
+        
+        if (!$fileUpload.data("fileupload")) {
+          $fileUpload.fileupload($fileUpload.data())
+        }
+        
+        if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length > 0) {
+          $fileUpload.find(':file').get(0).files = e.originalEvent.dataTransfer.files
+          $fileUpload.find(':file').trigger("change")
+        }
+      })
+    }
   })
 
 }(window.jQuery);
